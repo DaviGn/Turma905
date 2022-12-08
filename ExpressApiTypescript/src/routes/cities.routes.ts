@@ -6,14 +6,14 @@ let cities: any[] = [];
 
 // /GET
 citiesRoutes.get('/', (req, res) => {
-  return res.send(cities);
+  return res.json(cities);
 });
 
 // /POST
 citiesRoutes.post('/', (req, res) => {
   const city = req.body;
   cities.push(city);
-  return res.send(city);
+  return res.json(city);
 });
 
 export default citiesRoutes;
