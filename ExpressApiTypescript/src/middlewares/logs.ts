@@ -5,15 +5,11 @@ export default async function logsMiddleware(
   res: Response,
   next: NextFunction
 ) {
-  try {
-    const { method, url } = req;
-    const trace = `${method} ${url}`;
+  const { method, url } = req;
+  const trace = `${method} ${url}`;
 
-    console.info(trace);
-    console.time();
-    await next();
-    console.timeEnd();
-  } catch (ex) {
-    console.log(ex);
-  }
+  console.info(trace);
+  console.time();
+  await next();
+  console.timeEnd();
 }

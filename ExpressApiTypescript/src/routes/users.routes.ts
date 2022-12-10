@@ -1,46 +1,108 @@
 import { Request, Response, Router } from 'express';
-import { User } from '../domain/entities/user';
+import { v4 } from 'uuid';
+import { PrismaClient } from '@prisma/client';
+
 import { UserDto } from '../domain/dtos/user';
 
 // Mapeamento as rotas
 // /users
 const userRoutes = Router();
-
-let users: User[] = [];
+const prisma = new PrismaClient();
 
 const emailRegex =
   /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
-userRoutes.get('/', (request: Request, response: Response) => {
+userRoutes.get('/', async (request: Request, response: Response) => {
+  const users = await prisma.user.findMany({
+    include: {
+      city: true,
+    },
+  });
   return response.json(users);
 });
 
 interface GetParams {
-  id: number;
+  id: string;
 }
 
-userRoutes.get('/:id', (request: Request<GetParams>, response: Response) => {
-  const { id } = request.params;
-  const user = users.find((x) => x.id == id);
-
-  if (!user) {
-    return response.status(404).json({
-      message: 'User not found!',
+userRoutes.get(
+  '/:id',
+  async (request: Request<GetParams>, response: Response) => {
+    const { id } = request.params;
+    const user = await prisma.user.findFirst({
+      where: {
+        id: {
+          equals: id,
+        },
+      },
+      include: {
+        city: true,
+      },
     });
-  }
 
-  return response.send(user);
-});
+    if (!user) {
+      return response.status(404).json({
+        message: 'User not found!',
+      });
+    }
+
+    return response.send(user);
+  }
+);
 
 userRoutes.post(
   '/',
-  (request: Request<{}, {}, UserDto>, response: Response) => {
+  async (request: Request<{}, {}, UserDto>, response: Response) => {
     const user = request.body;
 
-    if (!user.id) {
+    if (!user.name) {
       return response.status(400).json({
-        field: 'id',
-        message: 'Id is invalid!',
+        field: 'name',
+        message: 'Name is invalid!',
+      });
+    }
+
+    if (!user.email || !emailRegex.test(user.email)) {
+      return response.status(400).json({
+        field: 'email',
+        message: 'E-mail is invalid!',
+      });
+    }
+
+    const createdUser = await prisma.user.create({
+      data: {
+        id: v4(),
+        name: user.name,
+        email: user.email,
+        cityId: user.cityId,
+      },
+    });
+    return response.json(createdUser);
+  }
+);
+
+interface PutParams {
+  id: string;
+}
+
+userRoutes.put(
+  '/:id',
+  async (request: Request<PutParams, {}, UserDto>, response: Response) => {
+    const { id } = request.params;
+    const userData = request.body;
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: {
+          equals: id,
+        },
+      },
+    });
+
+    if (!user) {
+      // Retornar que não encontrou
+      return response.status(404).json({
+        message: 'User not found!',
       });
     }
 
@@ -58,58 +120,49 @@ userRoutes.post(
       });
     }
 
-    users.push(user);
-    return response.json(user);
-  }
-);
+    const updatedUser = await prisma.user.update({
+      data: {
+        name: userData.name,
+        email: userData.email,
+      },
+      where: {
+        id: id,
+      },
+    });
 
-interface PutParams {
-  id: number;
-}
-
-userRoutes.put(
-  '/:id',
-  (
-    request: Request<PutParams, {}, Omit<UserDto, 'id'>>,
-    response: Response
-  ) => {
-    const { id } = request.params;
-    const userIndex = users.findIndex((x) => x.id == id);
-
-    if (userIndex === -1) {
-      // Retornar que não encontrou
-      return response.status(404).json({
-        message: 'User not found!',
-      });
-    }
-
-    users[userIndex].name = request.body.name;
-    users[userIndex].email = request.body.email;
-
-    return response.json(users[userIndex]);
+    return response.json(updatedUser);
   }
 );
 
 interface DeleteParams {
-  id: number;
+  id: string;
 }
 
 userRoutes.delete(
   '/:id',
-  (request: Request<DeleteParams>, response: Response) => {
+  async (request: Request<DeleteParams>, response: Response) => {
     const { id } = request.params;
 
     // Procurar se o usuário existe
-    const userIndex = users.findIndex((x) => x.id == id);
-    const userExists = userIndex > -1;
+    const user = await prisma.user.findFirst({
+      where: {
+        id: {
+          equals: id,
+        },
+      },
+    });
 
-    if (!userExists) {
+    if (!user) {
       return response.status(404).json({
         message: 'User not found!',
       });
     }
 
-    users = users.filter((x) => x.id != id);
+    await prisma.user.delete({
+      where: {
+        id: id,
+      },
+    });
     return response.json({
       message: 'User deleted succeeded!',
     });

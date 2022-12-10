@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model City {
+  id    Int         @id @default(autoincrement())
+  name  String
+  uf    String
+  users User[]
+}
+
+model User {
+  id    String     @id
+  email String
+  name  String
+  city  City       @relation(fields: [cityId], references: [id])
+  cityId Int
+}
+
+
+
+
+
+// model Marca {
+//   id  Int @id
+//   nome  String
+//   produtos Produto[]
+// }
+
+// model Produto {
+//   id  String  @id
+//   descricao String
+//   valor Decimal
+//   qtd Int
+//   marcaId Int
+//   marca Marca @relation(fields: [marcaId], references: [id])
+//   itens ItensCompra[]
+// }
+
+// model Compra {
+//   id String @id
+//   valorTotal Decimal
+//   itens ItensCompra[]
+// }
+
+// model ItensCompra {
+//   id Int @id @default(autoincrement())
+//   compraId String
+//   compra Compra @relation(fields: [compraId], references: [id])
+//   produtoId String
+//   produto Produto @relation(fields: [produtoId], references: [id])
+//   qtd Int
+// }
