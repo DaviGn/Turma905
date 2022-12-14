@@ -15,6 +15,7 @@ export class CreateUserUseCase {
         name: user.name,
         email: user.email,
         cityId: user.cityId,
+        password: '123456',
       },
     });
 

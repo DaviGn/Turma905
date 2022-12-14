@@ -17,42 +17,43 @@ model City {
 model User {
   id    String     @id
   email String
+  password String
   name  String
   city  City       @relation(fields: [cityId], references: [id])
   cityId Int
+  purchases Purchase[]
 }
 
+model Brand {
+  id  Int @id
+  name  String
+  products Product[]
+}
 
+model Product {
+  id  String  @id
+  description String
+  unitValue Decimal
+  qtd Int
+  brandId Int
+  brand Brand @relation(fields: [brandId], references: [id])
+  items PurchaseItems[]
+}
 
+model Purchase {
+  id String @id
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  totalValue Decimal
+  items PurchaseItems[]
+}
 
-
-// model Marca {
-//   id  Int @id
-//   nome  String
-//   produtos Produto[]
-// }
-
-// model Produto {
-//   id  String  @id
-//   descricao String
-//   valor Decimal
-//   qtd Int
-//   marcaId Int
-//   marca Marca @relation(fields: [marcaId], references: [id])
-//   itens ItensCompra[]
-// }
-
-// model Compra {
-//   id String @id
-//   valorTotal Decimal
-//   itens ItensCompra[]
-// }
-
-// model ItensCompra {
-//   id Int @id @default(autoincrement())
-//   compraId String
-//   compra Compra @relation(fields: [compraId], references: [id])
-//   produtoId String
-//   produto Produto @relation(fields: [produtoId], references: [id])
-//   qtd Int
-// }
+model PurchaseItems {
+  id Int @id @default(autoincrement())
+  purchaseId String
+  purchase Purchase @relation(fields: [purchaseId], references: [id])
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  qtd Int
+  unitValue Decimal
+}
