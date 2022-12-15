@@ -6,13 +6,13 @@ import {
   createUser,
   updateUser,
   deleteUser,
-} from '../controllers/user';
+} from '@controllers/user';
 
 import {
   userValidations,
   editUserValidations,
   userIdValidation,
-} from '../validators/user';
+} from '@validators/user';
 
 const userRoutes = Router();
 

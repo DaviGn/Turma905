@@ -1,4 +1,4 @@
-export interface CityDto {
+export interface CityResponse {
   id: number;
   name: string;
   uf: string;
