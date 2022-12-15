@@ -1,4 +1,5 @@
 import { PrismaClient, User } from '@prisma/client';
+import { NotFoundException } from 'domain/exceptions/notFound';
 
 const prisma = new PrismaClient();
 
@@ -16,6 +17,10 @@ export class GetUserUseCase {
         city: true,
       },
     });
+
+    if (!user) {
+      throw new NotFoundException('User not found!');
+    }
 
     return user;
   }
