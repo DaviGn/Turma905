@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
 
-import { CreateCityRequest, UpdateCityRequest } from '@request/city';
+import { CityDto } from '@domain/dtos/city';
 import {
   ListCitiesUseCase,
   GetCityUseCase,
   CreateCityUseCase,
-  // UpdateCityUseCase,
-  // DeleteCityUseCase,
+  UpdateCityUseCase,
+  DeleteCityUseCase,
 } from '@useCases/city';
 import { processResult } from '@presenters';
 
@@ -24,7 +24,7 @@ export async function getCity(req: Request<{ id: string }>, res: Response) {
 }
 
 export async function createCity(
-  req: Request<{}, {}, CreateCityRequest>,
+  req: Request<{}, {}, Omit<CityDto, 'id'>>,
   res: Response
 ) {
   const cityData = req.body;
@@ -33,25 +33,25 @@ export async function createCity(
   return processResult(res, result);
 }
 
-// export async function updateCity(
-//   req: Request<{ id: string }, {}, UpdateCityRequest>,
-//   res: Response
-// ) {
-//   const { id } = req.params;
-//   const cityData = req.body;
+export async function updateCity(
+  req: Request<{ id: string }, {}, Omit<CityDto, 'id'>>,
+  res: Response
+) {
+  const { id } = req.params;
+  const cityData = req.body;
 
-//   const useCase = new UpdateCityUseCase();
-//   const result = await useCase.handle({
-//     id: Number(id),
-//     ...cityData,
-//   });
+  const useCase = new UpdateCityUseCase();
+  const result = await useCase.handle({
+    id: Number(id),
+    ...cityData,
+  });
 
-//   return processResult(res, result);
-// }
+  return processResult(res, result);
+}
 
-// export async function deleteCity(req: Request<{ id: string }>, res: Response) {
-//   const { id } = req.params;
-//   const useCase = new DeleteCityUseCase();
-//   const result = await useCase.handle(Number(id));
-//   return processResult(res, result);
-// }
+export async function deleteCity(req: Request<{ id: string }>, res: Response) {
+  const { id } = req.params;
+  const useCase = new DeleteCityUseCase();
+  const result = await useCase.handle(Number(id));
+  return processResult(res, result);
+}

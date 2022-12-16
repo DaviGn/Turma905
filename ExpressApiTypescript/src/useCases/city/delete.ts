@@ -1,31 +1,38 @@
-// import { inject, injectable } from 'tsyringe';
+import { IPresenter, NotFoundPresenter, DeletedPresenter } from '@presenters';
+import { PrismaClient } from '@prisma/client';
 
-// import { ICityRepository } from '@repositories/city';
-// import { IPresenter, NotFoundPresenter, DeletedPresenter } from '@presenters';
+const prisma = new PrismaClient();
 
-// @injectable()
-// export class DeleteCityUseCase {
-//   constructor(@inject('CityRepository') private repository: ICityRepository) {}
+export class DeleteCityUseCase {
+  constructor() {}
 
-//   async handle(id: number): Promise<IPresenter> {
-//     const cityExist = await this.checkIfCityExists(id);
+  async handle(id: number): Promise<IPresenter> {
+    const cityExist = await this.checkIfCityExists(id);
 
-//     if (!cityExist) {
-//       return new NotFoundPresenter({ message: 'City not found!' });
-//     }
+    if (!cityExist) {
+      return new NotFoundPresenter({ message: 'City not found!' });
+    }
 
-//     await this.repository.delete(id);
-//     return new DeletedPresenter();
-//   }
+    await prisma.city.delete({
+      where: {
+        id: id,
+      },
+    });
+    return new DeletedPresenter();
+  }
 
-//   private async checkIfCityExists(id: number): Promise<boolean> {
-//     const existingCity = await this.repository.findById(id);
-//     const cityExist = !!existingCity;
-//     return cityExist;
+  private async checkIfCityExists(id: number): Promise<boolean> {
+    const existingCity = await prisma.city.findFirst({
+      where: {
+        id: id,
+      },
+    });
+    const cityExist = !!existingCity;
+    return cityExist;
 
-//     // If want to validate through exception
-//     // if (!cityExist) {
-//     //   throw new NotFoundException('City not found!');
-//     // }
-//   }
-// }
+    // If want to validate through exception
+    // if (!cityExist) {
+    //   throw new NotFoundException('City not found!');
+    // }
+  }
+}
