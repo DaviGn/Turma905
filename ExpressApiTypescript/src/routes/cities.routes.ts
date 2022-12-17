@@ -20,8 +20,8 @@ citiesRoutes.get('/', listCities);
 citiesRoutes.get('/:id', getCity);
 citiesRoutes.post(
   '/',
-  createCityValidations,
-  validationsMiddleware,
+  // createCityValidations,
+  // validationsMiddleware,
   createCity
 );
 // citiesRoutes.put(

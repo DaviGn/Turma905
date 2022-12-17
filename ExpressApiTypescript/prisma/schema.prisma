@@ -18,6 +18,7 @@ model User {
   id    String     @id
   email String
   password String
+  salt String
   name  String
   city  City       @relation(fields: [cityId], references: [id])
   cityId Int
