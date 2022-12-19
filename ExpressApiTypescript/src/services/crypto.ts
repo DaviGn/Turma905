@@ -11,3 +11,10 @@ export function crypt(password: string): CryptData {
     .toString('hex');
   return { hash: hash, salt: salt };
 }
+
+export function hashPassword(password: string, salt: string): string {
+  const hash = crypto
+    .pbkdf2Sync(password, salt, 1000, 64, 'sha512')
+    .toString('hex');
+  return hash;
+}
